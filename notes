@@ -1,0 +1,48 @@
+Common Design Patterns in ORM Implementation:
+Active Record Pattern:
+
+What it is: This pattern directly links database rows to objects, where each object represents a row in the table, and the class itself contains methods to interact with the database.
+ORM Usage: Frameworks like Ruby on Rails and Laravel heavily use the Active Record pattern. Some ORMs in Python (like Django ORM) also implement this pattern. The model class contains both business logic and database access logic.
+
+Data Mapper Pattern:
+
+What it is: This pattern separates the database logic from the business objects. It uses a mapper class to handle the transfer of data between objects and the database.
+ORM Usage: SQLAlchemy uses this pattern, where model classes are separate from the logic that interacts with the database, promoting separation of concerns and flexibility in how models are persisted.
+
+Repository Pattern:
+
+What it is: The repository acts as an abstraction layer that hides the actual data access code from the business logic, enabling business objects to work with repositories rather than handling raw queries.
+ORM Usage: Although the repository pattern is not built into most ORMs, developers can wrap their ORM logic within repositories to enhance testability and maintainability of the code. This pattern is often seen in large applications that need to decouple the domain logic from data access.
+
+Unit of Work Pattern:
+
+What it is: This pattern manages a set of changes to objects during a business transaction and ensures that all changes are either committed to the database or discarded.
+ORM Usage: Many ORMs implement a Unit of Work internally. SQLAlchemy, for example, groups all changes made to objects in a session and applies them as a single transaction when committing the session. Peewee also supports similar functionality via transaction contexts.
+Identity Map Pattern:
+
+What it is: The identity map ensures that each object loaded from the database is represented only once within the session to avoid duplicate instances of the same data.
+ORM Usage: SQLAlchemy uses an identity map to ensure that multiple queries for the same object return the same instance. This reduces memory usage and avoids inconsistencies.
+
+Proxy Pattern:
+
+What it is: The proxy pattern defers the creation of expensive objects (e.g., database queries) until they are needed.
+ORM Usage: Lazy loading is a classic example of the proxy pattern in ORMs. When you query an object, related objects (e.g., foreign keys) are not fetched immediately but are fetched when accessed. SQLAlchemy, Django ORM, and Peewee implement lazy loading.
+
+Articles and Resources on Design Patterns and ORM:
+
+"Design Patterns for ORM systems":
+
+This article dives into various design patterns that influence how ORM systems are designed and implemented, focusing on the differences between Active Record and Data Mapper patterns.
+"Design Patterns in ORM Libraries":
+
+A blog post or article that could discuss the use of patterns like Unit of Work, Identity Map, and Repository within ORMs like Hibernate, SQLAlchemy, or Django ORM.
+Martin Fowler’s Patterns of Enterprise Application Architecture:
+
+Martin Fowler's classic book introduces many of the core design patterns related to ORM, such as Data Mapper, Active Record, Unit of Work, and Identity Map. He describes how these patterns solve common problems in dealing with relational databases and object-oriented languages.
+Online resource from Martin Fowler: A website version of some sections of the book.
+"ORM and Design Patterns: Making Sense of Them":
+
+A comprehensive overview of how design patterns are applied within various ORMs and how developers can leverage them to enhance code maintainability.
+ORM Pattern Best Practices:
+
+A series of blog posts or whitepapers by ORM authors like Mike Bayer (SQLAlchemy) or developers behind Django, explaining the patterns that guided their design decisions.
