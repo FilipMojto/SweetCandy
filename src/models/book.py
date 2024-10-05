@@ -1,30 +1,54 @@
 from typing import Iterable
-from active_record import ActiveRecord
+
+from .model import Model, DataAttribute, StringAttribute, IntegerAttribute
+from patterns.active_record import ActiveRecord
+from patterns.table_data_gateway import TableDataGateway, Filter
 
 # Example of Active Record Pattern
 # This class represents Book entity from ERD diagram
 
-class Book(ActiveRecord):
+class BookFilter(Filter):
+
+	# overriding where()
+
+	def where(expr: str):
+		pass
+
+
+class Book(ActiveRecord, TableDataGateway):
 	title = ""
+
+
+	# table data gateway API
+
+	# @staticmethod
+	# def find() -> :
+	_TABLE = "books"
+
+
+
 
 
 	# builder pattern used within a contructor
 	def __init__(self,
-			  ID: int = None,
+			#   ID: int = None,
 			  title: str = None,
-			  author: str = None,
-			  genres: Iterable[str] = [],
+			  ISBN: str = None,
+			  author_id: int = None,
+			#   genres: Iterable[str] = [],
 			  publication_date: str = None,
 			  page_count: int = None):
-	
+
+		super().__init__()
+		# self.__ID = ID
 		
-		self.__ID = ID
-	
-		self.__title = title
-		self.__author = author
-		self.__genres = genres
-		self.__publication_date = publication_date
-		self.__page_count = page_count
+		# print(f"Title: {title}")
+		self.__title = StringAttribute(title)
+		self.__ISBN = StringAttribute(ISBN)
+		self.__author_id = IntegerAttribute(author_id)
+		# self.__genres = genres
+		self.__publication_date = DataAttribute(publication_date)
+		self.__page_count = IntegerAttribute(page_count)
 
 	# by returning self we can use setters for chaining initialization
 
@@ -42,7 +66,7 @@ class Book(ActiveRecord):
 	
 	
 	def get_author(self):
-		return self.__author
+		return self.__author_id
 	
 
 	
@@ -52,7 +76,8 @@ class Book(ActiveRecord):
 	
 
 	def get_genres(self):
-		return self.__genres
+		pass
+		# return self.__genres
 
 
 	def get_publication_date(self):
@@ -73,14 +98,19 @@ class Book(ActiveRecord):
 		return self
 	
 	
-	# overriding model interface
-	def save():
-		# implementation
-		pass
+	# # overriding model interface
+	# def save(self):
 
-	def delete():
-		# implementation
-		pass
+	# 	self._cursor.execute("""
+	# 		INSERT INTO 
+
+	# 	""")
+	# 	# implementation
+	# 	pass
+
+	# def delete(self):
+	# 	# implementation
+	# 	pass
 
 	# @staticmethod
 	# def find(expr):
