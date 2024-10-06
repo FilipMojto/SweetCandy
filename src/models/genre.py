@@ -1,5 +1,5 @@
-from patterns.active_record import ActiveRecord
-from patterns.table_data_gateway import TableDataGateway
+from patterns.activerec import ActiveRecord
+from patterns.tabledatagate import TableDataGateway
 from models.model import StringAttribute
 
 class Genre(TableDataGateway, ActiveRecord):
@@ -13,5 +13,5 @@ class Genre(TableDataGateway, ActiveRecord):
 	
 	def set_name(self, name: str):
 		self.__name = StringAttribute(name)
-		
+
 		

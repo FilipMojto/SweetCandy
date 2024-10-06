@@ -1,8 +1,8 @@
 from typing import Iterable
 
 from .model import Model, DataAttribute, StringAttribute, IntegerAttribute
-from patterns.active_record import ActiveRecord
-from patterns.table_data_gateway import TableDataGateway, Filter
+from patterns.activerec import ActiveRecord
+from patterns.tabledatagate import TableDataGateway, Filter
 
 # Example of Active Record Pattern
 # This class represents Book entity from ERD diagram
@@ -15,8 +15,10 @@ class BookFilter(Filter):
 		pass
 
 
-class Book(ActiveRecord, TableDataGateway):
+class Book(Model):
 	title = ""
+
+	
 
 
 	# table data gateway API
@@ -24,6 +26,7 @@ class Book(ActiveRecord, TableDataGateway):
 	# @staticmethod
 	# def find() -> :
 	_TABLE = "books"
+
 
 
 
@@ -49,6 +52,11 @@ class Book(ActiveRecord, TableDataGateway):
 		# self.__genres = genres
 		self.__publication_date = DataAttribute(publication_date)
 		self.__page_count = IntegerAttribute(page_count)
+		self.__haha = IntegerAttribute(5)
+
+		# self._collect_fields()
+
+	
 
 	# by returning self we can use setters for chaining initialization
 
@@ -132,4 +140,10 @@ class Book(ActiveRecord, TableDataGateway):
 
 		return string
 
-	
+
+# from patterns.datamapper import DataMapper
+
+# class BookMapper(DataMapper):
+
+# 	@staticmethod
+# 	def 

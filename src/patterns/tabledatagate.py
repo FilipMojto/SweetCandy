@@ -1,11 +1,17 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from sqlite3 import Connection
+
 class Filter(ABC):
 	COLS: List[str] = None
 
-	def __init__(self, conn):
+	def __init__(self, conn: Connection):
 		self.conn = conn
+		self.cur = self.conn.cursor()
+
+
+
 
 
 	@abstractmethod
@@ -35,7 +41,7 @@ class TableDataGateway(ABC):
 	# 	pass
 
 	@staticmethod
-	def find() -> Filter:
+	def where() -> Filter:
 		pass
 
 
