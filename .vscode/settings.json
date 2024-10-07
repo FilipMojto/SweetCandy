@@ -1,0 +1,10 @@
+{
+    "Create constructor from class attributes": {
+        "prefix": "initattrs",
+        "body": [
+            "def __init__(self, ${1:attribute1}, ${2:attribute2}):",
+            "\tself.$1 = $1",
+            "\tself.$2 = $2"
+        ],
+        "description": "Auto-generate constructor with class attributes"
+    }

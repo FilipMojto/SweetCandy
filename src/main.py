@@ -11,60 +11,38 @@ DEF_DB_PATH = "../databases/library.db"
 
 
 
+
+
 if __name__ == "__main__":
 	
-
+	# in order to start a new connection to the database we initialize
+	# an ORM manager
 	manager = ORMManager(database=DEF_DB_PATH)
 	manager.open()
+	
+	# we can create a new Book Model instance by using the constructor
+	book = Book(title="The Lord of the Rings", ISBN="DKSKDS", page_count=112, publication_date=None)
 
-	book = Book()
+	# we can modify instance's attributes
+	# model's tester methods will verify the constraints defined in the class
+	book.page_count = 5
+	book.title = "Harry Potter"
 
+	# author = Author(username="J. K. Rowling")
+
+
+	# we can print model's attributes in neat way
+	print(book.__str__())
+
+	# we can store or remote the book instance from the database by using ActiveRecord API
+	book.save()
+	book.delete()
+
+	# alternatively we can use DataMapper's API to save/update/delete an istance
 	DataMapper.save(model=book)
+	DataMapper.delete(model=book)
 
 
-	
-
-	print(book.is_saved())
-
-
-
-
-
-	# # Accessing the username attribute
-	# print(author.username)  # Output: "dds"
-
-	# # Setting a new username
-	# author.username = "new_username"
-	# print(author.username)  # Output: "new_username"
-
-	# print(author.set_username())
-
-
-
-	# book = Book()
-	
-	# print(f"Haha: {Book.get_field_names()}")
-
-	# manager.import_schema(schema=LIBRARY_SCHEMA)
-
-
-	# book = Book(
-	# 		 title="Harry Potter and Philospher's Stone",
-	# 		 ISBN="978-3-16-148410-12",
-	# 		author_id=3,
-	# 		publication_date='2021-05-12',
-	# 		page_count=314)
-
-	# # book.save()
-	# print(book.fields())
-	# book._collect_fields()
-	# print(book.fields())
-
-	
-	# # here we use builder pattern's chaning feature
-	# book = Book(page_count=423)
-	# book.set_title("The Lord of the Rings: The Fellowship of the Ring").set_author("J.R.R. Tolkien")
-	
-
+	# here we close the connection
 	manager.close()
 	

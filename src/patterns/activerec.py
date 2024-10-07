@@ -14,7 +14,6 @@ class ActiveRecord(ABC):
 	def __init__(self):
 		super().__init__()
 		
-	
 
 
 	def save(self):

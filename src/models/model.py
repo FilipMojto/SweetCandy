@@ -16,32 +16,41 @@ class IllegalModelState(Exception):
         super().__init__(self.message)
 
 
-class DataAttribute:
+class ModelContraintViolation(Exception):
+    def __init__(self, message: str = "Model's contraint violated") -> None:
+        super().__init__(message)
+
+
+
+class Field:
     
-    def __init__(self, data: object):
+    def __init__(self, data: object = None):
         self.data = data
 
 
-class StringAttribute(DataAttribute):
+class StringField(Field):
     
-    def __init__(self, data: str):
+    def __init__(self, data: str = None):
         super().__init__(data=data)
 
 
         if data is not None and not isinstance(data, str):
             raise TypeError("Provided data must be a string!")
+    
+    
 
 
-class IntegerAttribute(DataAttribute):
-    def __init__(self, data: int):
+
+class IntegerField(Field):
+    def __init__(self, data: int = None):
         super().__init__(data=data)
 
         if data is not None and not isinstance(data, int):
             raise TypeError("Provided data must be a integer!")
         
 
-class FloatAttribute(DataAttribute):
-    def __init__(self, data: float):
+class FloatField(Field):
+    def __init__(self, data: float = None):
         super().__init__(data=data)
 
         if data is not None and not isinstance(data, float):
@@ -52,48 +61,91 @@ class FloatAttribute(DataAttribute):
 
 class AutoInitMeta(ABCMeta):
     def __new__(cls, name, bases, attrs):
-        # Get static attributes and their types
+        # Prepare static attributes (class-level attributes) for initialization
+        static_attributes = {k: v for k, v in attrs.items() if isinstance(v, Field) or isinstance(v, property)}
 
-        # for k, v in attrs.items():
-        #     if k == "__annotations__":
-        #         for j, l in v.items():
-        #             if issubclass(str, l):
-        #                 print(j, l)
-        # print(attrs.items())
-        # print(attrs.items())
-        # static_attributes = {a: c for a, c in attrs['__annotations__'].items() if issubclass(c, DataAttribute)}
-        # print(static_attributes)
+        # Get the __init__ method from attrs or inherit from bases
+        original_init = attrs.get('__init__')
 
-        # static_attributes = {k: v for k, v in attrs.items() if not k.startswith('__') and not callable(v)}
-        # print(static_attributes)
+        # If __init__ is not in attrs, look for it in base classes
+        if original_init is None:
+            for base in bases:
+                original_init = getattr(base, '__init__', None)
+                if original_init is not None:
+                    break
 
-        static_attributes = {}
+        # Check if the current class is a subclass of Model
+        if any(issubclass(base, Model) for base in bases):
+            # Define a new __init__ method that wraps the original
+            def __init__(self, *args, **kwargs):
+                # Call the original __init__ method if it exists
+                if original_init is not None:
+                    # Filter out kwargs intended for Model's base class
+                    model_args = {k: v for k, v in kwargs.items() if hasattr(self, f"_{k}")}
 
-        # Create an __init__ method dynamically
-        def __init__(self, **kwargs):
-            for attr, value in static_attributes.items():
-                # Set instance variables based on class attributes
-                setattr(self, attr, kwargs.get(attr, value))
+                    # Call the original init with filtered kwargs
+                    original_init(self, *args, **model_args)
 
-                
-        
-        # Add the __init__ method to the class
-        attrs['__init__'] = __init__
-        
+                # print(static_attributes)
+
+             
+
+                # Append static attribute initialization for fields in the child class
+                for attr, field in static_attributes.items():
+                    print(f"{attr}:{field}")
+                    # Ensure we set the value within the Field object
+                    if isinstance(field, Field):
+                        field.data = kwargs.get(attr, field.data)  # Set the data of the Field instance
+                    setattr(self, f"_{attr}", field)  # Preserve the Field instance itself
+                    print(self.title)
+
+                  
+
+
+            # Replace the __init__ method in attrs
+            attrs['__init__'] = __init__
+
         return super().__new__(cls, name, bases, attrs)
-
-
 
 
 # Create a common metaclass that combines all behaviors
 # class CommonMeta(AutoInitMeta, ActiveRecordMeta, TableDataGatewayMeta):
 #     pass
 
+class Model:
+    pass
 
 class Model(ActiveRecord, TableDataGateway, metaclass=AutoInitMeta):
-# class Model(ABC):
     _connection: Connection = None
     _TABLE: str = None
+
+    __models = []
+
+ 
+
+    def __setattr__(self, name: str, value) -> None:
+        # Construct the name of the setter method
+        # print("chECKING setting attr")
+        setter_name = f"test_{name}"
+
+        # Check if the setter method exists in the class
+        setter_method = getattr(self, setter_name, None)
+        # print(setter_name)
+        # If the setter method exists and is callable, call it
+        # print(setter_method)
+        if callable(setter_method):
+            result = setter_method(value)  # Call the setter method with the value
+
+            if result is not None and isinstance(result, bool) and not result:
+                raise ModelContraintViolation(message=f"Model's contrain violated: {name}")
+
+        
+        super().__setattr__(name, value)
+        # else:
+        #     # Otherwise, set the attribute directly
+        #     super().__setattr__(name, value)
+        
+
 
     def __init__(self):
         super().__init__()
@@ -103,112 +155,131 @@ class Model(ActiveRecord, TableDataGateway, metaclass=AutoInitMeta):
 
         self._cur = Model._connection.cursor()
 
-        self.__ID: int = None
-        self.__fields = {}
-
+        self._ID: int = None  # Changed __ID to _ID (avoid name mangling)
+        # self._fields = {}  # Changed __fields to _fields
+        # print("INITIALIZING!")
         # Automatically create instance variables from class-level attributes
-        self._initialize_attributes()
+        # self._initialize_attributes()
 
-    def _initialize_attributes(self):
-        # Iterate over all class-level attributes
-        print(self.__class__.__dict__.items())
 
-        for name, value in self.__class__.__dict__.items():
-            if isinstance(value, DataAttribute):
-                # Set an instance variable with a single underscore prefix
-                setattr(self, f"_{name}", value)
-                self.__fields[name] = value.data
+    
 
-    # def _collect_fields(self):
-    #     for key, value in self.__dict__.items():
-    #         if isinstance(value, DataAttribute):
-    #             if key.startswith('_') and '__' in key:
-    #                 key = key.split('__', 1)[1]
-    #             self.__fields[key] = value.data
+    # def _collect_attributes(self):
+    #     # print("INITIALIZING!")
+    #     # Iterate over all class-level attributes
+
+    #     # print(self.__class__.__dict__.items())
+    #     for name, value in self.__class__.__dict__.items():
+    #         if isinstance(value, Field):
+    #             # Set an instance variable with a single underscore prefix
+    #             setattr(self, f"_{name}", value)
+    #             self._fields[name] = value.data
+
+    def _collect_attributes(self):
+        """
+        Collects all attributes that are instances of the Field class 
+        and returns them as a dictionary.
+        """
+        collected = {}
+
+        print(self.__dict__.items())
+
+        # Iterate over all instance variables
+        for attr_name, attr_value in self.__dict__.items():
+            # Check if the attribute is a Field or subclass of Field
+            if isinstance(attr_value, Field):
+                # Remove leading underscore from the attribute name if present
+                clean_name = attr_name.lstrip('_')
+                collected[clean_name] = attr_value.data  # Assuming Field has a 'data' attribute to store value
+
+        return collected
+
+
 
     def is_saved(self):
-        return self.__ID is not None
+        return self._ID is not None
 
-    def fields(self):
-        return self.__fields
+    # def get_fields(self):
+    
+    #     return self._fields
+    
+    def __str__(self):
+        # print("ErE")
+        # print(vars(self))
+        
+
+
+        rep = self.__class__.__name__ + ": "
+
+
+
+
+        for attr, value in vars(self).items():
+            # print(value)
+            # print(attr)
+            rep += (attr + "=")
+            rep += str(value.data) if isinstance(value, Field) else str(value)
+            rep += ", "
+        # print(rep)
+        rep = rep[:-2]
+
+        return rep
+
     
     def get_ID(self):
-        return self.__ID
-    
+        return self._ID
 
-    # table data gateway API
 
+    # ActiveRecord and TableDataGateway API (as before)
     @staticmethod
     def where() -> Filter:
         pass
-
 
     @staticmethod
     def delete() -> Filter:
         pass
 
 
-    # active record API
 
     def save(self):
-    
-        # here we extract all DataAttributes defined in the model
-        # fields = {}
-        # for key, value in self.__dict__.items():
-        # 	# Check if the attribute is a DataAttribute or its subclass
-        # 	if isinstance(value, DataAttribute):
-        # 		# Remove name-mangling for class-specific private attributes
-        # 		if key.startswith('_') and '__' in key:
-        # 			key = key.split('__', 1)[1]
-                
-        # 		# Add the attribute to the fields dictionary
-        # 		fields[key] = value.data
-
-        fields = self.fields()
+        fields = self._collect_attributes()
+        print(fields)
+        # print(f"Fields: {fields}")
 
         if not fields:
             raise IllegalModelState("No fields to insert or update")
 
         if not self.is_saved():
-            # Insert logic if ID is None
-            placeholders = ', '.join(['?'] * len(fields)) 
+            # Insert logic
+            placeholders = ', '.join(['?'] * len(fields))
             columns = ', '.join(fields.keys())
-            values = list(fields.values())
 
-            # print(self._TABLE)
-            # print(columns)
-            
-            insert_query = f"INSERT INTO {self._TABLE} ({columns}) VALUES ({placeholders})"
         
+            values = list(fields.values())
+            
+
+            insert_query = f"INSERT INTO {self._TABLE} ({columns}) VALUES ({placeholders})"
             self._cur.execute(insert_query, values)
 
-            # Sets the ID after inserting (assuming autoincrement)
-            self.__ID = self._cur.lastrowid 
-            
-            
+            # Set the ID after inserting (assuming autoincrement)
+            self._ID = self._cur.lastrowid
         else:
-            # Update logic if ID exists
-            set_clause = ', '.join([f"{key} = ?" for key in fields.keys()])  # Create SET part of the query
-            values = list(fields.values())  # Values to set
-            values.append(self.__ID)  # Append ID for the WHERE clause
+            # Update logic
+            set_clause = ', '.join([f"{key} = ?" for key in fields.keys()])
+            values = list(fields.values())
+            values.append(self._ID)
 
-            update_query = f"UPDATE {Model._TABLE} SET {set_clause} WHERE id = ?"
+            update_query = f"UPDATE {self._TABLE} SET {set_clause} WHERE id = ?"
             self._cur.execute(update_query, values)
-        
-        # Commit the transaction to save changes
+
         self._cur.connection.commit()
 
-
-
     def delete(self):
-        if self.__ID is None:
+        if self._ID is None:
             raise IllegalModelState(message="Cannot delete record: Not stored in a database!")
-        
-        delete_query = f"""
-            DELETE FROM {self._TABLE} WHERE id = ?
-        """
 
-        self._cur.execute(delete_query, (self.__ID,))
+        delete_query = f"DELETE FROM {self._TABLE} WHERE id = ?"
+        self._cur.execute(delete_query, (self._ID,))
         self._cur.connection.commit()
 
     # @classmethod

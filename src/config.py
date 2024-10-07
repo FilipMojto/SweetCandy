@@ -2,6 +2,7 @@ from typing import Literal
 from pathlib import Path
 
 from models.model import Model
+from patterns.datamapper import DataMapper
 
 import sqlite3
 
@@ -29,6 +30,10 @@ class ORMManager():
 		self.__connection = sqlite3.connect(database=self.__DATABASE)
 		self.__cursor = self.__connection.cursor()
 		Model._connection = self.__connection
+		
+		DataMapper._connection = self.__connection
+		DataMapper._cursor = DataMapper._connection.cursor()
+
 		
 
 	def is_open(self):

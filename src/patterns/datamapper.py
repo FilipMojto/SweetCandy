@@ -10,7 +10,7 @@ class DataMapper(Model):
 	@staticmethod
 	def save(model: Model):
 		
-		fields = model.fields()
+		fields = model.get_fields()
 		print(fields)
 
 		if not fields:
