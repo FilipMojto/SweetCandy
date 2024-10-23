@@ -18,6 +18,7 @@ Unit of Work Pattern:
 
 What it is: This pattern manages a set of changes to objects during a business transaction and ensures that all changes are either committed to the database or discarded.
 ORM Usage: Many ORMs implement a Unit of Work internally. SQLAlchemy, for example, groups all changes made to objects in a session and applies them as a single transaction when committing the session. Peewee also supports similar functionality via transaction contexts.
+
 Identity Map Pattern:
 
 What it is: The identity map ensures that each object loaded from the database is represented only once within the session to avoid duplicate instances of the same data.

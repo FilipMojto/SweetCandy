@@ -1,23 +1,28 @@
 from patterns.activerec import ActiveRecord
 from patterns.tabledatagate import TableDataGateway
 
-from models.model import StringAttribute
+from models.model import StringField
 
 class Author(TableDataGateway, ActiveRecord):
     _TABLE = "authors"
 
     # Class-level attribute
-    username = StringAttribute("dds")
+    username = StringField()
 
-    @property
-    def username(self):
-        """Getter for the username"""
-        return self._username.data  # Access the dynamically created _username
+    
 
-    @username.setter
-    def username(self, value: str):
-        """Setter for the username"""
-        self._username = StringAttribute(value)
+
+
+    # @property
+    # def username(self):
+    #     """Getter for the username"""
+
+    #     return self._username.data  # Access the dynamically created _username
+
+    # @username.setter
+    # def username(self, value: str):
+    #     """Setter for the username"""
+    #     self._username = StringField(value)
 
     # def set_username(self, username: str = None):
     # 	if username is None:
@@ -27,7 +32,7 @@ class Author(TableDataGateway, ActiveRecord):
 
 
 
-    
+
 
     # def __init__(self, username: str):
     # 	super().__init__()
@@ -36,10 +41,4 @@ class Author(TableDataGateway, ActiveRecord):
 
 
     # def get_username(self):
-    # 	return self.__username
-    
-
-        
-        
-
-
+    # 	

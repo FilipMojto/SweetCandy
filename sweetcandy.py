@@ -19,6 +19,10 @@ cur.execute("""
 class Book:
 	conn = conn
 	cur = conn.cursor()
+	def __init__(self, attribute1, attribute2):
+		self.attribute1 = attribute1
+		self.attribute2 = attribute2
+
 
 	def __init__(self, ID: int = None, name: str = None, author: str = None, genre: str = None, release_year: str = None, page_count: str = None):
 		# self.__id = id
