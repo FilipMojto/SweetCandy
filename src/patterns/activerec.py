@@ -21,5 +21,5 @@ class ActiveRecord(ABC):
 	
 
 
-	def delete(self):
+	def delete_all(self):
 		pass

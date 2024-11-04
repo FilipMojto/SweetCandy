@@ -88,6 +88,7 @@ class AutoInitMeta(ABCMeta):
 
                 # print(static_attributes)
 
+                # self.static_attributes = static_attributes
              
 
                 # Append static attribute initialization for fields in the child class
@@ -102,7 +103,6 @@ class AutoInitMeta(ABCMeta):
                   
 
 
-            # Replace the __init__ method in attrs
             attrs['__init__'] = __init__
 
         return super().__new__(cls, name, bases, attrs)
@@ -232,12 +232,18 @@ class Model(ActiveRecord, TableDataGateway, metaclass=AutoInitMeta):
 
     # ActiveRecord and TableDataGateway API (as before)
     @staticmethod
-    def where() -> Filter:
+    def collect(where: str):
         pass
 
+        # filter = Filter(conn=Model._connection, fields=)
+
+        # return Filter[Model](conn=Model._connection, fields=['ala'], op='get')
+
     @staticmethod
-    def delete() -> Filter:
+    def delete_all(where: str) -> int:
         pass
+        # return Filter[Model](conn=Model._connection, fields=['ala'], op='delete')
+
 
 
 
@@ -282,11 +288,21 @@ class Model(ActiveRecord, TableDataGateway, metaclass=AutoInitMeta):
         self._cur.execute(delete_query, (self._ID,))
         self._cur.connection.commit()
 
-    # @classmethod
-    # def get_field_names(cls):
-    #     # Return the annotations (field names) from the constructor
+    @classmethod
+    def get_field_names(cls):
+        """Returns attribute names of a model defined by user (of type Field) at class level
+
+        Returns:
+            _type_: _description_
+        """
+
+      
         
-    #     return list(cls.__init__.__annotations__.keys())
+        return [
+            attr_name
+            for attr_name, attr_value in cls.__dict__.items()
+            if isinstance(attr_value, Field)
+        ]
 
 
 

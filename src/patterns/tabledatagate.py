@@ -1,22 +1,26 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Literal
 
 from sqlite3 import Connection
 
-class Filter(ABC):
-	COLS: List[str] = None
+class Filter[T](ABC):
+	
 
-	def __init__(self, conn: Connection):
+	def __init__(self, conn: Connection, fields: List[str], op: Literal['get', 'delete']):
 		self.conn = conn
 		self.cur = self.conn.cursor()
+		self.fields = fields
+		self.operation = op
+		
 
 
+	# @abstractmethod
+	def where(self, expr: str) -> List[T]:
+		if self.operation == 'get':
+			pass
 
-
-
-	@abstractmethod
-	def where(expr: str):
-		pass
+		elif self.operation == 'delete':
+			pass
 
 
 
@@ -41,10 +45,10 @@ class TableDataGateway(ABC):
 	# 	pass
 
 	@staticmethod
-	def where() -> Filter:
+	def collect(where: str) -> List:
 		pass
 
 
 	@staticmethod
-	def delete() -> Filter:
+	def delete_all(where: str) -> int:
 		pass

@@ -9,9 +9,9 @@ class DataMapper(Model):
 
 	@staticmethod
 	def save(model: Model):
-		
-		fields = model.get_fields()
-		print(fields)
+	
+		fields = model._collect_attributes()
+		# print(fields)
 
 		if not fields:
 			raise IllegalModelState("No fields to insert or update")
@@ -40,8 +40,8 @@ class DataMapper(Model):
 			set_clause = ', '.join([f"{key} = ?" for key in fields.keys()])  # Create SET part of the query
 			values = list(fields.values())  # Values to set
 			values.append(model.get_ID())  # Append ID for the WHERE clause
-
-			update_query = f"UPDATE {Model._TABLE} SET {set_clause} WHERE id = ?"
+			
+			update_query = f"UPDATE {model._TABLE} SET {set_clause} WHERE id = ?"
 			DataMapper._cursor.execute(update_query, values)
 			# self._cur.execute(update_query, values)
 		

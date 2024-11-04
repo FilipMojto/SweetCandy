@@ -88,7 +88,7 @@ class Book:
 	# 	pass
 
 
-# without using design pattern principles the initialization may look confusing (it might be unclear which value represents which attribute)
+# without using design pattern principles the initialization may be confusing (it might be unclear which value represents which attribute)
 # this problem becomes greater mainly when coding in programming languages like java, c++ or c#, but also in python (as shown in below example)
 # first approach - how initialization looks in c++, java, etc., but also in Python without using Builder Pattern
 book = Book("Harry Potter and Philoshoper's stone", "J. K. Rowling", "Fantasy", 1997, 315)
